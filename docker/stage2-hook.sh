@@ -258,7 +258,7 @@ seed_one() {
     fi
 }
 seed_one ".env" ".env.example"
-seed_one "config.yaml" "cli-config.yaml.example"
+seed_one "config.yaml" "docker/config.yaml"
 seed_one "SOUL.md" "docker/SOUL.md"
 seed_one "AGENTS.md" "docker/AGENTS.md"
 
