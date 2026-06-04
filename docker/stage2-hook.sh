@@ -261,11 +261,6 @@ seed_one ".env" ".env.example"
 seed_one "config.yaml" "docker/config.yaml"
 seed_one "SOUL.md" "docker/SOUL.md"
 seed_one "AGENTS.md" "docker/AGENTS.md"
-# --- Force Gemini model configuration ---
-# Always overwrite config.yaml with the docker template to ensure correct model/gateway settings
-if [ -f "$INSTALL_DIR/docker/config.yaml" ]; then
-    as_hermes cp "$INSTALL_DIR/docker/config.yaml" "$HERMES_HOME/config.yaml"
-fi
 
 # .env holds API keys and secrets — restrict to owner-only access. Applied
 # unconditionally (not only on first-seed) so a host-mounted .env that was
