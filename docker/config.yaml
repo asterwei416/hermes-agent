@@ -1,6 +1,10 @@
 model:
-  default: google/gemini-2.5-flash-preview
+  default: google/gemini-2.5-flash-preview:free
   provider: openrouter
+
+agent:
+  auxiliary_provider: openrouter
+  auxiliary_model: google/gemini-2.5-flash-preview:free
 
 gateway:
   platforms:
