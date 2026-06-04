@@ -1,7 +1,6 @@
 model:
-  default: gemini-3-flash
+  default: gemini-2.5-flash
   provider: gemini
-  base_url: https://generativelanguage.googleapis.com/v1beta
 
 gateway:
   platforms:
