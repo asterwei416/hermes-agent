@@ -1,6 +1,6 @@
 model:
-  default: gemini-3-flash
-  provider: gemini
+  default: google/gemini-2.5-flash-preview
+  provider: openrouter
 
 gateway:
   platforms:
