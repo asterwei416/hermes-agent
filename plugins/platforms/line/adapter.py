@@ -106,6 +106,8 @@ LINE_PUSH_URL = "https://api.line.me/v2/bot/message/push"
 LINE_LOADING_URL = "https://api.line.me/v2/bot/chat/loading/start"
 LINE_CONTENT_URL_FMT = "https://api-data.line.me/v2/bot/message/{message_id}/content"
 LINE_BOT_INFO_URL = "https://api.line.me/v2/bot/info"
+LINE_GROUP_PROFILE_URL = "https://api.line.me/v2/bot/group/{group_id}/member/{user_id}"
+LINE_USER_PROFILE_URL = "https://api.line.me/v2/bot/profile/{user_id}"
 
 # LINE Messaging API hard limits
 LINE_PER_BUBBLE_CHARS = 5000  # Hard limit per text message object
@@ -968,11 +970,23 @@ class LineAdapter(BasePlatformAdapter):
         if chat_type == "dm" and self._client:
             asyncio.create_task(self._client.loading(chat_id))
 
+        # Resolve display name: check LINE_USER_NAMES env var first, then LINE API
+        display_name = user_id  # default fallback
+        user_names_env = os.getenv("LINE_USER_NAMES", "")
+        if user_names_env:
+            name_map = {}
+            for pair in user_names_env.split(","):
+                if ":" in pair:
+                    uid, dname = pair.split(":", 1)
+                    name_map[uid.strip()] = dname.strip()
+            if user_id in name_map:
+                display_name = name_map[user_id]
+
         source_obj = self.build_source(
             chat_id=chat_id,
             chat_type=chat_type,
             user_id=user_id,
-            user_name=user_id,
+            user_name=display_name,
             chat_name=chat_id,
         )
 
