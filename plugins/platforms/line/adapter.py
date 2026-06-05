@@ -954,6 +954,16 @@ class LineAdapter(BasePlatformAdapter):
         else:
             text = f"[unsupported message type: {msg_type}]"
 
+        # Trigger word filtering for group/room messages (infrastructure-level).
+        # This prevents the LLM from being called at all when no trigger word found.
+        if chat_type in ("group", "room"):
+            trigger_words_env = os.getenv("LINE_TRIGGER_WORDS", "")
+            if trigger_words_env:
+                trigger_words = [w.strip() for w in trigger_words_env.split(",") if w.strip()]
+                if trigger_words and not any(tw in text for tw in trigger_words):
+                    logger.info("LINE: group message without trigger word — silently ignoring")
+                    return
+
         # Best-effort typing indicator (DM only).
         if chat_type == "dm" and self._client:
             asyncio.create_task(self._client.loading(chat_id))
