@@ -970,7 +970,7 @@ class LineAdapter(BasePlatformAdapter):
         if chat_type == "dm" and self._client:
             asyncio.create_task(self._client.loading(chat_id))
 
-        # Resolve display name: check LINE_USER_NAMES env var first, then LINE API
+        # Resolve display name: LINE_USER_NAMES env var → LINE API → user_id fallback
         display_name = user_id  # default fallback
         user_names_env = os.getenv("LINE_USER_NAMES", "")
         if user_names_env:
@@ -981,6 +981,24 @@ class LineAdapter(BasePlatformAdapter):
                     name_map[uid.strip()] = dname.strip()
             if user_id in name_map:
                 display_name = name_map[user_id]
+        if display_name == user_id and self._client:
+            # Fall back to LINE API to get real display name
+            try:
+                profile_url = (
+                    LINE_GROUP_PROFILE_URL.format(group_id=chat_id, user_id=user_id)
+                    if chat_type == "group"
+                    else LINE_USER_PROFILE_URL.format(user_id=user_id)
+                )
+                async with self._client._session.get(
+                    profile_url,
+                    headers={"Authorization": f"Bearer {self._client._token}"},
+                    timeout=aiohttp.ClientTimeout(total=3.0),
+                ) as resp:
+                    if resp.status == 200:
+                        profile = await resp.json()
+                        display_name = profile.get("displayName", user_id)
+            except Exception:
+                pass  # Keep user_id as fallback
 
         source_obj = self.build_source(
             chat_id=chat_id,
